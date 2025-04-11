@@ -1,0 +1,94 @@
+<?php
+// OpenVPN Selling Panel - Full Feature Version
+session_start();
+include 'config.php'; // Database configuration file
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
+}
+
+// Fetch VPN plans
+$sql = "SELECT * FROM vpn_plans";
+$result = $conn->query($sql);
+
+// Fetch user info
+$user_id = $_SESSION['user_id'];
+$user_sql = "SELECT * FROM users WHERE id='$user_id'";
+$user_result = $conn->query($user_sql);
+$user = $user_result->fetch_assoc();
+
+// Fetch reseller info
+$reseller_sql = "SELECT * FROM resellers WHERE user_id='$user_id'";
+$reseller_result = $conn->query($reseller_sql);
+$reseller = $reseller_result->fetch_assoc();
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenVPN Panel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Welcome, <?php echo $user['username']; ?>!</h1>
+    <h2>Your Account Details</h2>
+    <p>Data Limit: <?php echo $user['data_limit']; ?> GB</p>
+    <p>Subscription Expiry: <?php echo $user['expiry_date']; ?></p>
+    
+    <?php if ($reseller) { ?>
+        <h2>Reseller Panel</h2>
+        <p>Accounts Created: <?php echo $reseller['accounts_created']; ?>/<?php echo $reseller['max_accounts']; ?></p>
+        <a href="create_account.php">Create New VPN Account</a>
+    <?php } ?>
+    
+    <h2>Available VPN Plans</h2>
+    <table>
+        <tr>
+            <th>Plan</th>
+            <th>Data Limit</th>
+            <th>Price</th>
+            <th>Action</th>
+        </tr>
+        <?php while ($row = $result->fetch_assoc()) { ?>
+        <tr>
+            <td><?php echo $row['plan_name']; ?></td>
+            <td><?php echo $row['data_limit']; ?> GB</td>
+            <td><?php echo $row['price']; ?> BDT</td>
+            <td><a href="payment.php?plan_id=<?php echo $row['id']; ?>">Buy</a></td>
+        </tr>
+        <?php } ?>
+    </table>
+
+    <h2>Manage Servers</h2>
+    <a href="add_server.php">Add New Server</a>
+    <a href="server_list.php">View Servers</a>
+    
+    <h2>Lifetime Subscription</h2>
+    <p>Upgrade to a lifetime VPN subscription for unlimited access.</p>
+    <a href="payment.php?plan_id=lifetime">Get Lifetime Deal</a>
+
+    <h2>Payment Methods</h2>
+    <p>Pay securely using mobile banking services:</p>
+    <ul>
+        <li>bKash: Send money to <strong>01922126812</strong> and submit transaction ID.</li>
+        <li>Rocket: Send money to <strong>01922126812</strong> and submit transaction ID.</li>
+        <li>Nagad: Send money to <strong>01922126812</strong> and submit transaction ID.</li>
+    </ul>
+    <p><a href="payment_confirm.php">Submit Transaction ID</a></p>
+
+    <h2>Extra Features</h2>
+    <ul>
+        <li>✅ Auto Expire System – Subscription auto disables after expiry.</li>
+        <li>✅ Reseller System – Resellers can create and manage accounts.</li>
+        <li>✅ Data Limit System – Users have defined data usage limits.</li>
+        <li>✅ Unlimited Server Support – Multiple servers can be added.</li>
+        <li>✅ Lifetime Deal Option – One-time payment for lifetime access.</li>
+        <li>✅ User Dashboard – Users can check their account details.</li>
+        <li>✅ Admin Panel – Manage servers, users, and payments.</li>
+        <li>✅ Multi-Server Load Balancing – Distribute traffic efficiently.</li>
+        <li>✅ Automated Email Notifications – Users get updates via email.</li>
+    </ul>
+</body>
+</html>
